@@ -1,0 +1,6 @@
+{
+  "name": "UniTrust Compliance MVP",
+  "description": "A minimalist and polished university compliance management system featuring policy navigation, incident reporting, and training tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

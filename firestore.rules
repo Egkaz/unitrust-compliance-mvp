@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny - Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 0.3 Primitives & Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    
+    // Auth tokens NEVER contain custom claims. Roles must be checked against DB or bootstrapped.
+    function isAdmin() { 
+      return isSignedIn() && (
+        request.auth.token.email == 'ovrerking@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+    
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // 1. User Profiles
+    match /users/{userId} {
+      function isValidUserProfile(data) {
+        return data.keys().hasAll(['uid', 'email', 'role']) &&
+               data.keys().size() <= 8 &&
+               data.uid == request.auth.uid &&
+               data.email == request.auth.token.email &&
+               data.role in ['student', 'faculty', 'admin'] &&
+               (data.displayName == null || (data.displayName is string && data.displayName.size() <= 100)) &&
+               (data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 1000));
+      }
+
+      allow get: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUserProfile(incoming()) && 
+                    incoming().updatedAt == request.time;
+      allow update: if isOwner(userId) && isValidUserProfile(incoming()) && 
+                    (incoming().role == existing().role || isAdmin()) &&
+                    (incoming().updatedAt == existing().updatedAt || incoming().updatedAt == request.time);
+    }
+
+    // 2. Policies
+    match /policies/{policyId} {
+      function getUserRole() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      }
+      function isTeacher() {
+        return isSignedIn() && (getUserRole() in ['faculty', 'admin']);
+      }
+      function isValidPolicy(data) {
+        return data.keys().hasAll(['title', 'category', 'content', 'status']) &&
+               data.title is string && data.title.size() <= 200 &&
+               data.category is string && data.category.size() <= 100 &&
+               data.content is string && data.content.size() <= 10000 &&
+               data.status in ['active', 'archived', 'draft'];
+      }
+
+      allow read: if true;
+      allow write: if isTeacher() && isValidPolicy(incoming());
+    }
+
+    // 3. Incident Reports
+    match /reports/{reportId} {
+      function getUserRole() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      }
+      function isTeacher() {
+        return isSignedIn() && (getUserRole() in ['faculty', 'admin']);
+      }
+      function isValidReport(data) {
+        return data.keys().hasAll(['description', 'status', 'createdAt']) &&
+               data.keys().size() <= 6 &&
+               data.description is string && data.description.size() <= 5000 &&
+               data.status in ['pending', 'reviewed', 'resolved'] &&
+               (data.analysis == null || data.analysis is map);
+      }
+
+      // Secure List Queries
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isTeacher());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isTeacher());
+      
+      allow create: if isValidReport(incoming()) && 
+                    incoming().status == 'pending' &&
+                    incoming().createdAt == request.time &&
+                    (incoming().userId == null || (isSignedIn() && incoming().userId == request.auth.uid));
+      
+      // Action-Based Updates
+      allow update: if isTeacher() && 
+                    isValidReport(incoming()) &&
+                    incoming().createdAt == existing().createdAt &&
+                    incoming().userId == existing().userId &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['status']);
+    }
+
+    // 4. Training Progress
+    match /training/{trainingId} {
+      function isValidTraining(data) {
+        return data.keys().hasAll(['userId', 'moduleId', 'progress', 'status']) &&
+               data.userId == request.auth.uid &&
+               data.moduleId is string && data.moduleId.size() <= 100 &&
+               data.progress is number && data.progress >= 0 && data.progress <= 100 &&
+               data.status in ['Not Started', 'In Progress', 'Completed', 'Locked'];
+      }
+
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isOwner(incoming().userId) && isValidTraining(incoming());
+      allow update: if isOwner(existing().userId) && isValidTraining(incoming());
+    }
+  }
+}

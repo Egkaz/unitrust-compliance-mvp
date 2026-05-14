@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user identification and role data.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique identifier from Firebase Auth" },
+        "email": { "type": "string", "description": "User's email address" },
+        "displayName": { "type": "string", "description": "Display name" },
+        "photoURL": { "type": "string", "description": "Profile picture URL" },
+        "role": { "type": "string", "enum": ["student", "faculty", "admin"], "description": "System role" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Policy": {
+      "title": "Compliance Policy",
+      "description": "Information about university policies and regulations.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Policy title" },
+        "category": { "type": "string", "description": "Policy category (e.g., Academic, Safety)" },
+        "content": { "type": "string", "description": "Policy text content" },
+        "version": { "type": "string", "description": "Policy version" },
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "archived", "draft"] }
+      },
+      "required": ["title", "category", "content", "status"]
+    },
+    "IncidentReport": {
+      "title": "Incident Report",
+      "description": "User reported compliance issues and the system analysis.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "ID of the reporter (can be null for anonymous)" },
+        "description": { "type": "string", "description": "Incident details provided by the user" },
+        "analysis": {
+          "type": "object",
+          "properties": {
+            "primaryCategory": { "type": "string" },
+            "severityLevel": { "type": "string" },
+            "recommendedNextSteps": { "type": "string" },
+            "relevantPolicyArea": { "type": "string" }
+          }
+        },
+        "status": { "type": "string", "enum": ["pending", "reviewed", "resolved"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["description", "status", "createdAt"]
+    },
+    "TrainingModule": {
+      "title": "Training Module Progress",
+      "description": "Tracks a user's progress through a specific training module.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "moduleId": { "type": "string" },
+        "title": { "type": "string" },
+        "progress": { "type": "number", "minimum": 0, "maximum": 100 },
+        "status": { "type": "string", "enum": ["Not Started", "In Progress", "Completed", "Locked"] },
+        "lastAccessed": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "moduleId", "progress", "status"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles managed by Auth UID."
+    },
+    "policies/{policyId}": {
+      "schema": "Policy",
+      "description": "Shared repository of policies."
+    },
+    "reports/{reportId}": {
+      "schema": "IncidentReport",
+      "description": "Incident reports filed by users."
+    },
+    "training/{trainingId}": {
+      "schema": "TrainingModule",
+      "description": "User-specific training progress records."
+    }
+  }
+}
