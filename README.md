@@ -1,6 +1,6 @@
 # 🛡️ UniTrust: AI-Powered University Compliance Platform
 
-![UniTrust Dashboard](https://raw.githubusercontent.com/Egkaz/UniTrust-Compliance-AI/main/src/assets/dashboard_screenshot.png)
+![UniTrust Dashboard](https://github.com/Egkaz/unitrust-compliance-mvp/blob/main/src/assets/dashboard_screenshot.png)
 
 **UniTrust** — это интеллектуальная цифровая экосистема для управления университетскими политиками и конфиденциальной отчетности об инцидентах. Проект решает проблему «университетского феодализма» и культуры молчания, предоставляя студентам безопасный инструмент для защиты своих прав.
 
