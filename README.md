@@ -1,20 +1,38 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🛡️ UniTrust: AI-Powered University Compliance Platform
 
-# Run and deploy your AI Studio app
+![UniTrust Dashboard](https://raw.githubusercontent.com/Egkaz/UniTrust-Compliance-AI/main/src/assets/dashboard_screenshot.png)
 
-This contains everything you need to run your app locally.
+**UniTrust** — это интеллектуальная цифровая экосистема для управления университетскими политиками и конфиденциальной отчетности об инцидентах. Проект решает проблему «университетского феодализма» и культуры молчания, предоставляя студентам безопасный инструмент для защиты своих прав.
 
-View your app in AI Studio: https://ai.studio/apps/42c42593-4001-47a5-bc87-b7dfc3cc576d
+## 🚀 Основные возможности
 
-## Run Locally
+* **🕵️ Интеллектуальная анонимность (Zero-Knowledge):** Встроенная нейросеть Gemini 1.5 Flash анализирует сообщения и автоматически удаляет персональные данные (ФИО, контакты) до того, как они попадут в базу данных.
+* **⚖️ Автоматический триаж и скоринг:** Система мгновенно классифицирует инцидент по категориям (Коррупция, Этика, Безопасность) и определяет уровень критичности.
+* **📚 Центр политик:** Единая база знаний всех регламентов университета с мгновенным поиском.
+* **📊 Compliance Dashboard:** Визуализация «здоровья» вуза в реальном времени. Общий рейтинг безопасности (**98.2%**) и статус системы позволяют администрации быстро реагировать на аномалии.
 
-**Prerequisites:**  Node.js
+## 🛠 Технологический стек
 
+* **AI Engine:** Google Gemini 1.5 Flash (через Google AI Studio).
+* **Backend & DB:** Firebase (Cloud Firestore + Auth).
+* **Security:** Firebase Security Rules для защиты конфиденциальных отчетов.
+* **Frontend:** React / Next.js с адаптивным интерфейсом под разные роли (Студент, Преподаватель, Админ).
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🧩 Структура проекта
+
+* `/src` — Исходный код приложения.
+* `server.ts` — Логика интеграции с Gemini API и деперсонализации данных.
+* `firestore.rules` — Настройки прав доступа к базе данных.
+* `security_spec.md` — Техническое описание протокола анонимности.
+
+## ⚙️ Установка
+
+1. Клонируйте репозиторий.
+2. Установите зависимости: `npm install`.
+3. Создайте файл `.env` и добавьте ваш `GEMINI_API_KEY`.
+4. Запустите проект: `npm run dev`.
+
+---
+
+**Разработал:** [Егор Казаков](https://github.com/Egkaz)
+*Проект создан в рамках кейс-чемпионата по цифровизации университетской среды.*
